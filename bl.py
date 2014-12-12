@@ -2,7 +2,10 @@
 
 import os
 
+from bs4 import BeautifulSoup
 import cleancss
+import tornado.gen
+import tornado.httpclient
 import tornado.ioloop
 import tornado.web
 
@@ -17,8 +20,27 @@ class HomeHandler(BaseHandler):
 	def get(self):
 		self.render('home.html')
 
+def parse_skills(html):
+	soup = BeautifulSoup(html)
+	table = soup.find_all('center')[1].find_next_sibling('table')
+	table = table.find('table').find('table')
+	dotted = table.find_all('td', class_='dotted')
+	for td in dotted:
+		if not td.string:
+			continue
+		split = td.string.split('/')
+		if split == ['\xa0']:
+			continue
+		skill = split[0].rstrip()
+		level = int(split[2][-2])
+		yield skill, level
+
 class SkillCheckHandler(BaseHandler):
+	@tornado.gen.coroutine
 	def get(self, char):
+		client = tornado.httpclient.AsyncHTTPClient()
+		response = yield client.fetch('http://eveboard.com/pilot/' + char)
+		skills = dict(parse_skills(response.body))
 		self.render('skillcheck.html')
 
 class CSSHandler(tornado.web.RequestHandler):
