@@ -1,0 +1,12 @@
+*:
+	box-sizing: border-box
+
+body:
+	background-color: #000
+	color: #ddd
+	font-family: sans-serif
+
+#wrapper:
+	width: 900px
+	margin: 0 auto 50px
+	background: #111

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block js %}
+	<script src="/static/js/home.js"></script>
+{% end %}
+
+{% block main %}
+	<form method="get" action="/skillcheck">
+		<label>character name:
+			<input type="text" name="char">
+		</label>
+	</form>
+{% end %}
