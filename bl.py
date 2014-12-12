@@ -35,13 +35,33 @@ def parse_skills(html):
 		level = int(split[2][-2])
 		yield skill, level
 
+doctrines = [
+	('Tengu', ['Caldari Offensive Systems', 'Caldari Defensive Systems',
+		'Caldari Propulsion Systems', 'Caldari Electronic Systems', 'Caldari Engineering Systems',
+		'Medium Hybrid Turret', 'Medium Railgun Specialization', 'Trajectory Analysis']),
+	('Scimitar', ['Logistics', 'Minmatar Cruiser', 'Shield Emission Systems', 'Capacitor Management']),
+	('Loki', ['Minmatar Offensive Systems', 'Minmatar Defensive Systems',
+		'Minmatar Propulsion Systems', 'Minmatar Electronic Systems', 'Minmatar Engineering Systems',
+		'Medium Projectile Turret', 'Medium Artillery Specialization', 'Trajectory Analysis']),
+	('Maelstrom', ['Minmatar Battleship', 'Large Projectile Turret', 'Trajectory Analysis']),
+	('Ishtar', ['Gallente Cruiser', 'Heavy Assault Cruisers', 'Sentry Drone Interfacing', 'Drone Interfacing']),
+	('Zealot', ['Amarr Cruiser', 'Heavy Assault Cruisers', 'Medium Energy Turret', 'Controlled Bursts']),
+]
+
 class SkillCheckHandler(BaseHandler):
 	@tornado.gen.coroutine
 	def get(self, char):
 		client = tornado.httpclient.AsyncHTTPClient()
 		response = yield client.fetch('http://eveboard.com/pilot/' + char)
 		skills = dict(parse_skills(response.body))
-		self.render('skillcheck.html')
+		doctrine_skills = []
+		for doctrine, relevant_skills in doctrines:
+			ds = []
+			for skill in relevant_skills:
+				level = skills.get(skill, 0)
+				ds.append((skill, level))
+			doctrine_skills.append((doctrine, ds))
+		self.render('skillcheck.html', doctrine_skills=doctrine_skills)
 
 class CSSHandler(tornado.web.RequestHandler):
 	def get(self, css_path):

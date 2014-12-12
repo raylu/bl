@@ -6,6 +6,9 @@ body:
 	color: #ddd
 	font-family: sans-serif
 
+h3:
+	margin: 0.5em 0 0
+
 #wrapper:
 	width: 900px
 	margin: 0 auto 50px
