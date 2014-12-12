@@ -79,7 +79,7 @@ if __name__ == '__main__':
 		],
 		template_path=os.path.join(os.path.dirname(__file__), 'templates'),
 		static_path=os.path.join(os.path.dirname(__file__), 'static'),
-		debug=True,
+		debug=config.debug,
 	).listen(config.port)
 	print('Listening on :%d' % config.port)
 	tornado.ioloop.IOLoop.instance().start()
