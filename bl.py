@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import urllib.parse
 
 from bs4 import BeautifulSoup
 import cleancss
@@ -20,9 +21,14 @@ class HomeHandler(BaseHandler):
 	def get(self):
 		self.render('home.html')
 
+class EveboardPasswordException(Exception):
+	pass
 def parse_skills(html):
 	soup = BeautifulSoup(html)
-	table = soup.find_all('center')[1].find_next_sibling('table')
+	try:
+		table = soup.find_all('center')[1].find_next_sibling('table')
+	except IndexError:
+		raise EveboardPasswordException()
 	table = table.find('table').find('table')
 	dotted = table.find_all('td', class_='dotted')
 	for td in dotted:
@@ -52,8 +58,17 @@ class SkillCheckHandler(BaseHandler):
 	@tornado.gen.coroutine
 	def get(self, char):
 		client = tornado.httpclient.AsyncHTTPClient()
-		response = yield client.fetch('http://eveboard.com/pilot/' + char)
-		skills = dict(parse_skills(response.body))
+		request = tornado.httpclient.HTTPRequest('http://eveboard.com/pilot/' + char)
+		password = self.get_query_argument('pass', default=None)
+		if password:
+			request.method = 'POST'
+			request.body = urllib.parse.urlencode({'pw': password})
+		response = yield client.fetch(request)
+
+		try:
+			skills = dict(parse_skills(response.body))
+		except EveboardPasswordException:
+			self.render('skillcheck.html', error='passworded eveboard')
 		doctrine_skills = []
 		for doctrine, relevant_skills in doctrines:
 			ds = []

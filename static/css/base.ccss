@@ -11,5 +11,5 @@ h3:
 
 #wrapper:
 	width: 900px
-	margin: 0 auto 50px
+	margin: 50px auto
 	background: #111
